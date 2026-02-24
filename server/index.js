@@ -50,9 +50,19 @@ const authLimiter = rateLimit({
   message: { success: false, message: 'Too many authentication attempts. Please wait 15 minutes.' }
 });
 
-// CORS configuration
+// CORS configuration - supports multiple origins
+const allowedOrigins = config.corsOrigin.split(',').map(origin => origin.trim());
 app.use(cors({
-  origin: config.corsOrigin,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
