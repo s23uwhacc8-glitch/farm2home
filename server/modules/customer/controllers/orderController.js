@@ -188,6 +188,106 @@ class OrderController {
   }
 
   /**
+   * Track order by Order ID
+   * PUBLIC - Anyone with order ID can track (for guest orders)
+   * For logged-in users, validates order belongs to them
+   * 
+   * Usage:
+   * - Guest users: POST /api/customer/orders/track with { orderId, email }
+   * - Logged-in users: Can track any of their orders without email verification
+   */
+  async trackOrder(req, res) {
+    try {
+      const { orderId, email } = req.body;
+
+      if (!orderId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Order ID is required'
+        });
+      }
+
+      // Find the order
+      const order = await Order.findById(orderId)
+        .populate('items.product', 'name images price unit')
+        .populate('items.farmer', 'name phone')
+        .populate('delivery.agent', 'name phone');
+
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: 'Order not found. Please check your Order ID.'
+        });
+      }
+
+      // If user is logged in, verify order belongs to them
+      if (req.user) {
+        if (order.user && order.user.toString() !== req.user._id.toString()) {
+          return res.status(403).json({
+            success: false,
+            message: 'This order does not belong to you'
+          });
+        }
+      } 
+      // If not logged in (guest), verify email matches
+      else {
+        if (!email) {
+          return res.status(400).json({
+            success: false,
+            message: 'Email is required to track guest orders'
+          });
+        }
+
+        // For guest orders, verify email
+        if (order.guest) {
+          if (order.guest.email.toLowerCase() !== email.toLowerCase()) {
+            return res.status(403).json({
+              success: false,
+              message: 'Email does not match order records'
+            });
+          }
+        } 
+        // For user orders accessed as guest, don't allow
+        else if (order.user) {
+          return res.status(403).json({
+            success: false,
+            message: 'This order requires login to track. Please log in to your account.'
+          });
+        }
+      }
+
+      // Return order with tracking information
+      res.json({
+        success: true,
+        order: {
+          _id: order._id,
+          orderNumber: order.orderNumber,
+          status: order.status,
+          createdAt: order.createdAt,
+          updatedAt: order.updatedAt,
+          items: order.items,
+          deliveryAddress: order.deliveryAddress,
+          payment: {
+            method: order.payment.method,
+            totalAmount: order.payment.totalAmount,
+            status: order.payment.status
+          },
+          delivery: order.delivery,
+          timeline: order.statusHistory,
+          estimatedDelivery: order.estimatedDelivery
+        }
+      });
+    } catch (error) {
+      console.error('trackOrder error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Server error',
+        error: error.message
+      });
+    }
+  }
+
+  /**
    * Cancel order
    * AUTHENTICATED - Customer can cancel their pending orders
    * BUG FIXED: Uses cancelOrder() model method for proper status history tracking.

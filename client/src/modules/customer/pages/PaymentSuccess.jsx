@@ -45,10 +45,40 @@ const PaymentSuccess = () => {
             <div>
               <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Order Number</p>
               <p className="text-xl font-bold text-gray-900">#{order.orderNumber}</p>
+              <p className="text-xs text-gray-500 mt-1">Order ID: {order._id}</p>
             </div>
             <div className="text-right">
               <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Total</p>
               <p className="text-xl font-bold text-green-600">₹{order.payment?.totalAmount?.toLocaleString('en-IN') || '—'}</p>
+            </div>
+          </div>
+
+          {/* Track Order Notice for Guest Users */}
+          <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-xl p-4 mb-5">
+            <div className="flex items-start gap-3">
+              <div className="bg-blue-100 p-2 rounded-lg">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-800 mb-1">📦 Track Your Order Anytime</p>
+                <p className="text-xs text-gray-600 mb-2">
+                  Save your Order ID: <span className="font-mono font-bold text-blue-600">{order._id}</span>
+                </p>
+                <p className="text-xs text-gray-500 mb-3">
+                  A confirmation email has been sent to your email with tracking details.
+                </p>
+                <Link 
+                  to="/track-order" 
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Track Order Status
+                </Link>
+              </div>
             </div>
           </div>
 

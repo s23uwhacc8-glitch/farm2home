@@ -28,6 +28,7 @@ const ProductList      = lazy(() => import('./modules/customer/pages/ProductList
 const ProductDetail    = lazy(() => import('./modules/customer/pages/ProductDetail'));
 const Cart             = lazy(() => import('./modules/customer/pages/Cart'));
 const Checkout         = lazy(() => import('./modules/customer/pages/Checkout'));
+const TrackOrder       = lazy(() => import('./modules/customer/pages/TrackOrder'));
 const CustomerDashboard= lazy(() => import('./modules/customer/pages/CustomerDashboard'));
 const PaymentUpload    = lazy(() => import('./modules/customer/pages/PaymentUpload'));
 const PaymentSuccess   = lazy(() => import('./modules/customer/pages/PaymentSuccess'));
@@ -89,6 +90,7 @@ const Layout = () => {
             <Route path="/products/:id"    element={<ProductDetail />} />
             <Route path="/cart"            element={<Cart />} />
             <Route path="/checkout"        element={<Checkout />} />
+            <Route path="/track-order"     element={<TrackOrder />} />
             <Route path="/payment-upload"  element={<PaymentUpload />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment/:orderId"   element={<PaymentSubmit />} />

@@ -51,6 +51,11 @@ router.get('/farmers/:id', farmerPublicController.getFarmerProfile);
 // ORDER ROUTES
 // ============================================
 
+// Track order by ID
+// PUBLIC - Anyone with order ID + email can track (for guest orders)
+// OPTIONAL AUTH - Logged-in users don't need email verification
+router.post('/orders/track', optionalAuth, orderController.trackOrder);
+
 // Create new order
 // OPTIONAL AUTH - Supports both guest and authenticated checkout
 // If user is logged in, req.user will be set; otherwise, guest info must be provided
