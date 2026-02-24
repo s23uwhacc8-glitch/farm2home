@@ -15,7 +15,7 @@ export default defineConfig({
   },
 
   build: {
-    outDir: 'build',
+    outDir: 'dist',
     sourcemap: false,
     // Split vendor chunks for better caching
     rollupOptions: {
