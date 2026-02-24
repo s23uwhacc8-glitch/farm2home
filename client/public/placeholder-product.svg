@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Background -->
+  <rect width="400" height="400" fill="#f3f4f6"/>
+  
+  <!-- Basket -->
+  <path d="M 150 220 Q 150 200 170 200 L 230 200 Q 250 200 250 220 L 260 280 Q 260 300 240 300 L 160 300 Q 140 300 140 280 Z" 
+        fill="#8b4513" stroke="#654321" stroke-width="3"/>
+  
+  <!-- Handle -->
+  <path d="M 170 200 Q 200 160 230 200" fill="none" stroke="#654321" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Apple 1 -->
+  <circle cx="190" cy="240" r="25" fill="#dc2626"/>
+  <ellipse cx="185" cy="235" rx="8" ry="10" fill="#ef4444" opacity="0.6"/>
+  <rect x="189" y="215" width="3" height="8" fill="#78350f"/>
+  <ellipse cx="188" cy="216" rx="6" ry="3" fill="#15803d"/>
+  
+  <!-- Apple 2 -->
+  <circle cx="220" cy="250" r="22" fill="#dc2626"/>
+  <ellipse cx="216" cy="246" rx="7" ry="9" fill="#ef4444" opacity="0.6"/>
+  <rect x="219" y="228" width="3" height="7" fill="#78350f"/>
+  <ellipse cx="218" cy="229" rx="5" ry="3" fill="#15803d"/>
+  
+  <!-- Leafy vegetable -->
+  <ellipse cx="200" cy="270" rx="18" ry="25" fill="#22c55e"/>
+  <ellipse cx="195" cy="268" rx="12" ry="18" fill="#16a34a"/>
+  <ellipse cx="205" cy="268" rx="12" ry="18" fill="#16a34a"/>
+  
+  <!-- Text -->
+  <text x="200" y="340" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="#6b7280" text-anchor="middle">Fresh Produce</text>
+</svg>

@@ -1,0 +1,42 @@
+{
+  "name": "farm2home-server",
+  "version": "1.0.0",
+  "description": "Farm2Home Backend API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "seed": "node seed.js"
+  },
+  "keywords": [
+    "farm",
+    "ecommerce",
+    "mern"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.4",
+    "multer": "^2.0.0",
+    "compression": "^1.7.4",
+    "nodemailer": "^6.9.16",
+    "cloudinary": "^2.5.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "overrides": {
+    "body-parser": "^1.20.3",
+    "send": "^0.19.0",
+    "busboy": "^1.6.0",
+    "cookie": "^0.7.0",
+    "path-to-regexp": "^0.1.10"
+  }
+}
