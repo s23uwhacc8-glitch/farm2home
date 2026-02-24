@@ -61,8 +61,13 @@ function priceHistory(currentPrice, volatility = 0.15) {
 
 const seedData = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('🔌 MongoDB connected');
+    // Only connect if not already connected (for standalone execution)
+    if (mongoose.connection.readyState === 0) {
+      await mongoose.connect(process.env.MONGO_URI);
+      console.log('🔌 MongoDB connected');
+    } else {
+      console.log('🔌 Using existing MongoDB connection');
+    }
 
     // Clear
     await Promise.all([User.deleteMany({}), Category.deleteMany({}), Product.deleteMany({})]);

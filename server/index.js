@@ -157,11 +157,15 @@ app.use(errorHandler);
 
 mongoose.set('strictQuery', false);
 mongoose.connect(config.mongoUri)
-  .then(() => {
+  .then(async () => {
     console.log('✅ MongoDB Connected Successfully');
     console.log('🏗️  Modular Architecture Loaded');
     console.log('📦 Modules: Customer | Farmer | Delivery | Admin');
     console.log('🌍 Environment:', config.env);
+    
+    // Auto-seed database on first deployment if enabled
+    const { runAutoSeed } = require('./core/utils/autoSeed');
+    await runAutoSeed();
   })
   .catch(err => {
     console.error('❌ MongoDB Connection Error:', err.message);
