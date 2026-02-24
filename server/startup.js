@@ -4,57 +4,90 @@
  */
 
 const mongoose = require('mongoose');
-const { config } = require('./core/config/env');
-const User = require('./core/models/User');
+const dotenv = require('dotenv');
+
+// Load environment variables
+dotenv.config();
 
 async function runStartup() {
   try {
-    console.log('🔍 Checking if database needs seeding...');
+    console.log('═══════════════════════════════════════════');
+    console.log('🚀 Farm2Home Startup');
+    console.log('═══════════════════════════════════════════');
+    console.log('📍 Environment:', process.env.NODE_ENV || 'development');
+    console.log('🔍 Checking database connection...');
     
     // Connect to MongoDB
-    await mongoose.connect(config.mongoUri);
-    console.log('✅ Connected to MongoDB');
+    const mongoUri = process.env.MONGO_URI;
+    if (!mongoUri) {
+      throw new Error('MONGO_URI environment variable is not set!');
+    }
+    
+    console.log('🔗 Connecting to MongoDB...');
+    await mongoose.connect(mongoUri);
+    console.log('✅ MongoDB Connected Successfully');
 
-    // Check if admin exists
-    const adminExists = await User.findOne({ 
-      role: 'admin',
-      email: process.env.ADMIN_EMAIL || 'admin@farm2home.com'
-    });
+    // Import User model after connection
+    const User = require('./core/models/User');
+    
+    // Check if any admin exists
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@farm2home.com';
+    console.log(`🔍 Checking for admin account: ${adminEmail}`);
+    
+    const adminExists = await User.findOne({ role: 'admin' });
 
     if (adminExists) {
-      console.log('✅ Admin account already exists - skipping seed');
+      console.log('✅ Admin account found - database already seeded');
+      console.log('📧 Admin email:', adminExists.email);
       console.log('🚀 Starting server...');
+      console.log('═══════════════════════════════════════════');
       await mongoose.connection.close();
-      require('./index.js'); // Start the main server
+      require('./index.js');
       return;
     }
 
-    console.log('🌱 No admin found - running seed script...');
+    console.log('🌱 No admin found - seeding database...');
+    console.log('═══════════════════════════════════════════');
     
-    // Run seed in a child process to avoid conflicts
-    const { spawn } = require('child_process');
-    const seedProcess = spawn('node', ['seed.js'], {
-      stdio: 'inherit',
-      cwd: __dirname
-    });
-
-    seedProcess.on('close', (code) => {
-      if (code === 0) {
-        console.log('✅ Database seeded successfully!');
-        console.log('🚀 Starting server...');
-        mongoose.connection.close().then(() => {
-          require('./index.js'); // Start the main server
-        });
-      } else {
-        console.error('❌ Seed failed with code:', code);
-        process.exit(1);
-      }
-    });
-
+    // Close connection before running seed (seed will create its own)
+    await mongoose.connection.close();
+    
+    // Run seed script directly and wait for completion
+    console.log('📦 Running seed script...');
+    const seedData = require('./seed.js');
+    await seedData();
+    
+    console.log('✅ Database seeded successfully!');
+    console.log('🚀 Starting server...');
+    console.log('═══════════════════════════════════════════');
+    
+    // Start the main server
+    require('./index.js');
+    
   } catch (error) {
-    console.error('❌ Startup error:', error);
+    console.error('═══════════════════════════════════════════');
+    console.error('❌ STARTUP ERROR:');
+    console.error('═══════════════════════════════════════════');
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    
+    if (error.message.includes('MONGO_URI')) {
+      console.error('\n💡 FIX: Set MONGO_URI in Render environment variables');
+    }
+    if (error.name === 'MongoServerError') {
+      console.error('\n💡 FIX: Check MongoDB Atlas network access (allow 0.0.0.0/0)');
+      console.error('💡 FIX: Verify MongoDB credentials are correct');
+    }
+    
+    console.error('═══════════════════════════════════════════');
     process.exit(1);
   }
 }
+
+// Catch unhandled rejections
+process.on('unhandledRejection', (error) => {
+  console.error('❌ Unhandled Promise Rejection:', error);
+  process.exit(1);
+});
 
 runStartup();

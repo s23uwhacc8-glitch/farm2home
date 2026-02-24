@@ -470,11 +470,22 @@ Admin      : admin@farm2home.com    / admin123
     • Fresh Cow Milk       — 2 farmers
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `);
-    process.exit(0);
+    return true; // Indicate success
   } catch (err) {
     console.error('❌ Seed error:', err);
-    process.exit(1);
+    throw err; // Re-throw for caller to handle
   }
 };
 
-seedData();
+// Only run and exit if this file is executed directly
+if (require.main === module) {
+  seedData()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error('Fatal seed error:', err);
+      process.exit(1);
+    });
+} else {
+  // If required as a module, export the function
+  module.exports = seedData;
+}
