@@ -145,6 +145,7 @@ class FarmerController {
   }
 
   // ── Dashboard & Analytics ─────────────────────────────────────────────────
+  async getDashboardStats(req, res) {
     try {
       const [products, orders] = await Promise.all([
         Product.find({ farmer: req.user._id }),
