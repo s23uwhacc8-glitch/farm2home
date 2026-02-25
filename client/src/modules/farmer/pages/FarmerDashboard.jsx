@@ -194,6 +194,7 @@ const InventoryTab = ({ products, onRefresh }) => {
   const [stockSave,  setStockSave]  = useState({});
   const [search,     setSearch]     = useState('');
   const [filterCat,  setFilterCat]  = useState('');
+  const [imgUploading, setImgUploading] = useState(false);
 
   useEffect(()=>{ axios.get('/api/farmer/categories').then(r=>setCategories(r.data.categories||[])).catch(()=>{}); },[]);
 
@@ -219,7 +220,7 @@ const InventoryTab = ({ products, onRefresh }) => {
 
   const del = async id => {
     if (!window.confirm('Delete this product?')) return;
-    try { await axios.delete(`/api/farmer/products/${id}`); onRefresh(); } catch(e) { alert(e.response?.data?.message||'Delete failed'); }
+    try { await axios.delete(`/api/farmer/products/${id}`); onRefresh(); } catch(e) { setErr(e.response?.data?.message||'Delete failed'); setShowModal(true); }
   };
 
   const saveStock = async id => {
@@ -313,11 +314,59 @@ const InventoryTab = ({ products, onRefresh }) => {
                 <div><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Shelf Life (days)</label><input type="number" min="0" value={form.shelfLife} onChange={setF('shelfLife')} placeholder="e.g. 7" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"/></div>
                 <div className="sm:col-span-2"><label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={form.isOrganic} onChange={setF('isOrganic')} className="w-4 h-4 text-green-600 rounded"/><span className="text-sm font-medium text-gray-700">🌿 Organic product</span></label></div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Image URLs</label>
-                  {form.images.map((img,i)=>(
-                    <div key={i} className="flex gap-2 mb-2"><input value={img} onChange={e=>setImg(i,e.target.value)} placeholder="https://…" className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"/>{i>0&&<button type="button" onClick={()=>setForm(f=>({...f,images:f.images.filter((_,j)=>j!==i)}))} className="px-2 text-red-400 hover:text-red-600 text-lg">×</button>}</div>
-                  ))}
-                  <button type="button" onClick={()=>setForm(f=>({...f,images:[...f.images,'']}))} className="text-xs text-green-600 hover:underline">+ Add image</button>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Product Images</label>
+                  <div className="space-y-2">
+                    {form.images.filter(Boolean).map((img,i)=>(
+                      <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
+                        <img src={img} alt="" className="w-12 h-12 rounded object-cover flex-shrink-0" onError={e=>e.target.style.display='none'}/>
+                        <span className="text-xs text-gray-500 flex-1 truncate">{img.length>60?img.slice(0,60)+'…':img}</span>
+                        <button type="button" onClick={()=>setForm(f=>({...f,images:f.images.filter((_,j)=>j!==i)}))} className="text-red-400 hover:text-red-600 text-lg leading-none px-1">×</button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-2 flex items-center gap-2">
+                    <label className="flex-1 cursor-pointer">
+                      <div className="flex items-center gap-2 px-3 py-2.5 border-2 border-dashed border-green-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition text-sm text-green-600 font-medium">
+                        <span>📷</span>
+                        <span>{imgUploading?'Uploading…':'Upload from device'}</span>
+                      </div>
+                      <input type="file" accept="image/*" multiple className="hidden" disabled={imgUploading}
+                        onChange={async(e)=>{
+                          const files=[...e.target.files]; if(!files.length) return;
+                          setImgUploading(true);
+                          for(const file of files){
+                            const reader=new FileReader();
+                            await new Promise(res=>{
+                              reader.onload=async(ev)=>{
+                                try{
+                                  const r=await axios.post('/api/farmer/products/upload-image',{imageData:ev.target.result});
+                                  if(r.data.success) setForm(f=>({...f,images:[...f.images.filter(Boolean),r.data.url]}));
+                                }catch{ setErr('Image upload failed. Check Cloudinary config.'); }
+                                res();
+                              };
+                              reader.readAsDataURL(file);
+                            });
+                          }
+                          setImgUploading(false);
+                          e.target.value='';
+                        }}
+                      />
+                    </label>
+                    <span className="text-xs text-gray-400">or</span>
+                    <button type="button" onClick={()=>setForm(f=>({...f,images:[...f.images,'']})) }
+                      className="px-3 py-2.5 border border-gray-300 rounded-lg text-xs text-gray-600 hover:bg-gray-50 font-medium transition">
+                      + Add URL
+                    </button>
+                  </div>
+                  {form.images.some(img=>img===''||img.startsWith('http'))&&form.images.filter(Boolean).map((img,i)=>
+                    img&&!img.startsWith('data:')&&img===form.images[i]&&!img.includes('cloudinary')?(
+                      <div key={'url-'+i} className="mt-1 flex gap-2">
+                        <input value={img} onChange={e=>setImg(i,e.target.value)} placeholder="https://…"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"/>
+                      </div>
+                    ):null
+                  )}
+                  <p className="text-xs text-gray-400 mt-1">Upload photos from your device or enter image URLs. First image is the thumbnail.</p>
                 </div>
                 <div className="sm:col-span-2"><label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Tags (comma separated)</label><input value={form.tags} onChange={setF('tags')} placeholder="e.g. fresh, local, pesticide-free" className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"/></div>
               </div>
@@ -346,7 +395,7 @@ const OrdersTab = ({ orders, onRefresh }) => {
   const update = async (id, status) => {
     setUpdating(u=>({...u,[id]:true}));
     try { await axios.put(`/api/farmer/orders/${id}/status`,{status}); onRefresh(); }
-    catch(e) { alert(e.response?.data?.message||'Update failed'); }
+    catch(e) { console.error(e.response?.data?.message||'Update failed'); }
     finally  { setUpdating(u=>({...u,[id]:false})); }
   };
 

@@ -13,6 +13,7 @@ router.post('/products',         fc.createProduct);
 router.put('/products/:id',      fc.updateProduct);
 router.patch('/products/:id/stock', fc.updateStock);
 router.delete('/products/:id',   fc.deleteProduct);
+router.post('/products/upload-image', fc.uploadProductImage);
 
 // Orders
 router.get('/orders',                        fc.getFarmerOrders);

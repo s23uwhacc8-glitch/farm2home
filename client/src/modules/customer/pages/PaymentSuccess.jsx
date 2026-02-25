@@ -1,7 +1,9 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { useAuth } from '../../../shared/contexts/AuthContext';
 
 const PaymentSuccess = () => {
+  const { user } = useAuth();
   const { order, message } = useLocation().state || {};
 
   if (!order) return (
@@ -53,34 +55,39 @@ const PaymentSuccess = () => {
             </div>
           </div>
 
-          {/* Track Order Notice for Guest Users */}
-          <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-xl p-4 mb-5">
-            <div className="flex items-start gap-3">
-              <div className="bg-blue-100 p-2 rounded-lg">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-800 mb-1">📦 Track Your Order Anytime</p>
-                <p className="text-xs text-gray-600 mb-2">
-                  Save your Order ID: <span className="font-mono font-bold text-blue-600">{order._id}</span>
-                </p>
-                <p className="text-xs text-gray-500 mb-3">
-                  A confirmation email has been sent to your email with tracking details.
-                </p>
-                <Link 
-                  to="/track-order" 
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          {/* Track Order — guests only; logged-in users have their dashboard */}
+          {!user ? (
+            <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-xl p-4 mb-5">
+              <div className="flex items-start gap-3">
+                <div className="bg-blue-100 p-2 rounded-lg flex-shrink-0">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Track Order Status
-                </Link>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-800 mb-1">📦 Track Your Order Anytime</p>
+                  <p className="text-xs text-gray-600 mb-1">
+                    Save your Order ID: <span className="font-mono font-bold text-blue-600">{order._id}</span>
+                  </p>
+                  <p className="text-xs text-gray-500 mb-3">
+                    A confirmation email has been sent to your email with tracking details.
+                  </p>
+                  <Link to="/track-order"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                    Track Order Status
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-5 flex items-center gap-3">
+              <div className="text-2xl">📦</div>
+              <div>
+                <p className="text-sm font-semibold text-green-800">Order placed successfully!</p>
+                <p className="text-xs text-green-600 mt-0.5">View and track your order anytime from your dashboard.</p>
+              </div>
+            </div>
+          )}
 
           {/* Payment status */}
           <div className="bg-gray-50 rounded-xl p-4 mb-5 flex items-center justify-between">
@@ -148,8 +155,11 @@ const PaymentSuccess = () => {
 
         {/* Actions */}
         <div className="grid sm:grid-cols-2 gap-3">
-          <Link to="/customer" className="btn-primary w-full justify-center py-4">View My Orders →</Link>
-          <Link to="/products" className="btn-outline w-full justify-center py-4">Continue Shopping</Link>
+          {user
+            ? <Link to="/customer" className="btn-primary w-full justify-center py-4">View My Orders →</Link>
+            : <Link to="/products" className="btn-primary w-full justify-center py-4">Continue Shopping →</Link>
+          }
+          {user && <Link to="/products" className="btn-outline w-full justify-center py-4">Continue Shopping</Link>}
         </div>
       </div>
     </div>

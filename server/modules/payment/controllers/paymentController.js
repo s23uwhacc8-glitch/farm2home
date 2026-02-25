@@ -253,6 +253,13 @@ class PaymentController {
         await order.save();
       }
 
+      // Notify customer
+      const customerEmail = order.user?.email || order.guest?.email;
+      const customerName  = order.user?.name  || order.guest?.name || 'Customer';
+      if (customerEmail) {
+        sendOrderStatusEmail({ to: customerEmail, name: customerName, order, newStatus: 'payment-approved' }).catch(() => {});
+      }
+
       res.json({
         success: true,
         message: `Payment approved for order #${order.orderNumber}`,

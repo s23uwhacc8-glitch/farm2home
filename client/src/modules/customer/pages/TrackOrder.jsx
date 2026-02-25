@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Package, Search, MapPin, Clock, CheckCircle, XCircle, Truck, AlertCircle } from 'lucide-react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import axios from '../../../core/config/axios';
 import { useAuth } from '../../../shared/contexts/AuthContext';
 
 const TrackOrder = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Logged-in users already have all their orders — redirect to dashboard
+  useEffect(() => {
+    if (user) navigate('/customer', { replace: true });
+  }, [user, navigate]);
   const [orderId, setOrderId] = useState('');
   const [email, setEmail] = useState('');
   const [order, setOrder] = useState(null);

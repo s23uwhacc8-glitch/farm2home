@@ -80,7 +80,7 @@ const Nav = () => {
             {[
               { to: '/', label: 'Home' },
               { to: '/products', label: 'Products' },
-              { to: '/track-order', label: '📦 Track Order' },
+              ...(!user ? [{ to: '/track-order', label: '📦 Track Order' }] : []),
             ].map(({ to, label }) => (
               <Link
                 key={to}
@@ -214,9 +214,11 @@ const Nav = () => {
             <Link to="/products" className="flex items-center gap-2 px-3 py-2.5 text-gray-700 font-medium hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors">
               🛒 Products
             </Link>
-            <Link to="/track-order" className="flex items-center gap-2 px-3 py-2.5 text-gray-700 font-medium hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors">
-              📦 Track Order
-            </Link>
+            {!user && (
+              <Link to="/track-order" className="flex items-center gap-2 px-3 py-2.5 text-gray-700 font-medium hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors">
+                📦 Track Order
+              </Link>
+            )}
             {user && (
               <Link to="/profile" className="flex items-center gap-2 px-3 py-2.5 text-gray-700 font-medium hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors">
                 👤 My Profile

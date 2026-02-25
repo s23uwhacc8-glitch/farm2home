@@ -2,6 +2,8 @@ const Product  = require('../../../core/models/Product');
 const Order    = require('../../../core/models/Order');
 const Category = require('../../../core/models/Category');
 const User     = require('../../../core/models/User');
+const { sendOrderStatusEmail } = require('../../../core/utils/emailService');
+const { uploadImage } = require('../../../core/utils/cloudinary');
 
 class FarmerController {
   // ── Products ────────────────────────────────────────────────────────────
@@ -117,12 +119,32 @@ class FarmerController {
       }
 
       await order.updateStatus(status, req.user._id, note);
+
+      // Send status notification to customer (non-blocking)
+      const populated = await Order.findById(order._id).populate('user', 'name email');
+      const customerEmail = populated.user?.email || populated.guest?.email;
+      const customerName  = populated.user?.name  || populated.guest?.name || 'Customer';
+      if (customerEmail) {
+        sendOrderStatusEmail({ to: customerEmail, name: customerName, order: populated, newStatus: status }).catch(() => {});
+      }
+
       res.json({ success: true, message: 'Status updated', order });
     } catch (e) { res.status(500).json({ success: false, message: e.message }); }
   }
 
+  // ── Product Image Upload ───────────────────────────────────────────────────
+  async uploadProductImage(req, res) {
+    try {
+      const { imageData } = req.body; // base64 data URI
+      if (!imageData) return res.status(400).json({ success: false, message: 'imageData is required' });
+      const url = await uploadImage(imageData, 'farm2home/products');
+      res.json({ success: true, url });
+    } catch (e) {
+      res.status(500).json({ success: false, message: e.message });
+    }
+  }
+
   // ── Dashboard & Analytics ─────────────────────────────────────────────────
-  async getDashboardStats(req, res) {
     try {
       const [products, orders] = await Promise.all([
         Product.find({ farmer: req.user._id }),
